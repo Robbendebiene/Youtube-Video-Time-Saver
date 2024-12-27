@@ -28,7 +28,7 @@ main();
 window.addEventListener("yt-navigate-finish", main);
 
 function main () {
-  if (window.location.pathname.startsWith("/watch")) {
+  if (window.location.pathname.startsWith("/watch") || window.location.pathname.includes("/embed/")) {
     videoPlayer = document.querySelector(VIDEO_SELECTOR_STRING);
     videoPlayer.addEventListener(SAVE_TIMESTAMP_EVENT, update);
     // update on timeline changes
@@ -39,7 +39,7 @@ function main () {
 
 
 function update () {
-  if (window.location.pathname.startsWith("/watch")) {
+  if (window.location.pathname.startsWith("/watch") || window.location.pathname.includes("/embed/")) {
     const startTime = Math.max(videoPlayer.currentTime - REWIND_TIME, 0);
     setYTVideoStartTimeParameter(startTime);
   }
@@ -49,13 +49,13 @@ function update () {
 function setYTVideoStartTimeParameter (startTime) {
   startTime = Math.floor(startTime);
   const currentURL = new URL(window.location.href);
-  currentURL.searchParams.set("t", startTime);
+  currentURL.searchParams.set("start", startTime);
   window.history.replaceState(null, null, currentURL.href);
 }
 
 
 function clearYTVideoStartTimeParameter () {
   const currentURL = new URL(window.location.href);
-  currentURL.searchParams.delete("t");
+  currentURL.searchParams.delete("start");
   window.history.replaceState(null, null, currentURL.href);
 }
