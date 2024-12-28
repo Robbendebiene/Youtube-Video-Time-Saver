@@ -7,6 +7,7 @@
 // @updateURL           https://raw.githubusercontent.com/Robbendebiene/Youtube-Video-Time-Saver/master/youtube-video-time-saver.user.js
 // @icon                https://www.youtube.com/favicon.ico
 // @match               *://www.youtube.com/*
+// @match               *://www.youtube-nocookie.com/*
 // @run-at              document-end
 // ==/UserScript==
 
