@@ -21,14 +21,15 @@ const VIDEO_SELECTOR_STRING = "#movie_player video";
 
 // global variables
 
-let videoPlayer;
+let videoPlayer, startTimeParameter;
 
 main();
 
 window.addEventListener("yt-navigate-finish", main);
 
 function main () {
-  if (window.location.pathname.startsWith("/watch") || window.location.pathname.includes("/embed/")) {
+  if (isVideoURL()) {
+    startTimeParameter = getYTVideoStartTimeParameter();
     videoPlayer = document.querySelector(VIDEO_SELECTOR_STRING);
     videoPlayer.addEventListener(SAVE_TIMESTAMP_EVENT, update);
     // update on timeline changes
@@ -37,25 +38,43 @@ function main () {
   }
 };
 
-
 function update () {
-  if (window.location.pathname.startsWith("/watch") || window.location.pathname.includes("/embed/")) {
+  if (isVideoURL()) {
     const startTime = Math.max(videoPlayer.currentTime - REWIND_TIME, 0);
     setYTVideoStartTimeParameter(startTime);
   }
 }
 
+function getYTVideoStartTimeParameter() {
+  if (isDirectVideoURL()) {
+    return "t";
+  }
+  else if (isEmbeddedVideoURL()) {
+    return "start";
+  }
+}
 
 function setYTVideoStartTimeParameter (startTime) {
   startTime = Math.floor(startTime);
   const currentURL = new URL(window.location.href);
-  currentURL.searchParams.set("start", startTime);
+  currentURL.searchParams.set(startTimeParameter, startTime);
   window.history.replaceState(null, null, currentURL.href);
 }
 
-
 function clearYTVideoStartTimeParameter () {
   const currentURL = new URL(window.location.href);
-  currentURL.searchParams.delete("start");
+  currentURL.searchParams.delete(startTimeParameter);
   window.history.replaceState(null, null, currentURL.href);
+}
+
+function isVideoURL () {
+   return isDirectVideoURL() || isEmbeddedVideoURL();
+}
+
+function isDirectVideoURL () {
+   return window.location.pathname.startsWith("/watch");
+}
+
+function isEmbeddedVideoURL () {
+   return window.location.pathname.startsWith("/embed");
 }
