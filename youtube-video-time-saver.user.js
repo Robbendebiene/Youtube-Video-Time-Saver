@@ -1,4 +1,3 @@
-
 // ==UserScript==
 // @name                Youtube-Video Time Saver
 // @description         Simple user script for retaining the video playback time across page reloads and browser restarts. For those who want to pause videos and continue watching them later.
@@ -20,43 +19,64 @@ const SAVE_TIMESTAMP_EVENT = "pause";
 // css selector for video player element
 const VIDEO_SELECTOR_STRING = "#movie_player video";
 
-// global variables
-
-let videoPlayer;
-
-main();
-
+// this is used to run after any page tasks like load event handlers
+setTimeout(main, 0);  
 window.addEventListener("yt-navigate-finish", main);
 
 function main () {
-  if (window.location.pathname.startsWith("/watch")) {
-    videoPlayer = document.querySelector(VIDEO_SELECTOR_STRING);
-    videoPlayer.addEventListener(SAVE_TIMESTAMP_EVENT, update);
+  if (isVideoURL()) {
+    const videoPlayer = document.querySelector(VIDEO_SELECTOR_STRING);
+    videoPlayer.addEventListener(SAVE_TIMESTAMP_EVENT, handleChange);
     // update on timeline changes
-    videoPlayer.addEventListener("seeking", update);
-    videoPlayer.addEventListener("ended", clearYTVideoStartTimeParameter);
+    videoPlayer.addEventListener("seeking", handleChange);
+    videoPlayer.addEventListener("ended", handleEnd);
   }
 };
 
-
-function update () {
-  if (window.location.pathname.startsWith("/watch")) {
-    const startTime = Math.max(videoPlayer.currentTime - REWIND_TIME, 0);
-    setYTVideoStartTimeParameter(startTime);
+function handleChange (event) {
+  if (isVideoURL()) {
+    const param = getYTVideoStartTimeURLParameterName();
+    const startTime = Math.max(event.target.currentTime - REWIND_TIME, 0);
+    setYTVideoStartTimeURLParameter(param, startTime);
   }
 }
 
-
-function setYTVideoStartTimeParameter (startTime) {
-  startTime = Math.floor(startTime);
-  const currentURL = new URL(window.location.href);
-  currentURL.searchParams.set("t", startTime);
-  window.history.replaceState(null, null, currentURL.href);
+function handleEnd (event) {
+  if (isVideoURL()) {
+    const param = getYTVideoStartTimeURLParameterName();
+    clearYTVideoStartTimeURLParameter(param);
+  }
 }
 
+function getYTVideoStartTimeURLParameterName() {
+  if (isDirectVideoURL()) {
+    return "t";
+  }
+  else if (isEmbeddedVideoURL()) {
+    return "start";
+  }
+}
 
-function clearYTVideoStartTimeParameter () {
-  const currentURL = new URL(window.location.href);
-  currentURL.searchParams.delete("t");
-  window.history.replaceState(null, null, currentURL.href);
+function setYTVideoStartTimeURLParameter (param, startTime) {
+  const newURL = new URL(window.location);
+  newURL.searchParams.set(param, Math.floor(startTime));
+  window.history.replaceState(null, null, newURL);
+}
+
+function clearYTVideoStartTimeURLParameter (param) {
+  const newURL = new URL(window.location);
+  newURL.searchParams.delete(param);
+  window.history.replaceState(null, null, newURL);
+}
+
+function isVideoURL () {
+   return isDirectVideoURL() || isEmbeddedVideoURL();
+}
+
+function isDirectVideoURL () {
+   return window.location.pathname.startsWith("/watch");
+}
+
+function isEmbeddedVideoURL () {
+   return window.location.pathname.startsWith("/embed");
 }
