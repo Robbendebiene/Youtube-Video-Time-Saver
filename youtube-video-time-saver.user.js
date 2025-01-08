@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name                Youtube-Video Time Saver
 // @description         Simple user script for retaining the video playback time across page reloads and browser restarts. For those who want to pause videos and continue watching them later.
-// @version             1.0.1
+// @version             1.1.0
 // @namespace           https://github.com/Robbendebiene/Youtube-Video-Time-Saver
 // @updateURL           https://raw.githubusercontent.com/Robbendebiene/Youtube-Video-Time-Saver/master/youtube-video-time-saver.user.js
 // @icon                https://www.youtube.com/favicon.ico
